@@ -158,6 +158,7 @@ type FieldError interface {
 
 	// Error returns the FieldError's message
 	Error() string
+	CustomError() error
 }
 
 // compile time interface checks
@@ -179,6 +180,12 @@ type fieldError struct {
 	param          string
 	kind           reflect.Kind
 	typ            reflect.Type
+	customError    error
+}
+
+// CustomError return the custom error message
+func (fe *fieldError) CustomError() error {
+	return fe.customError
 }
 
 // Tag returns the validation tag that failed.

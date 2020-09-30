@@ -90,6 +90,7 @@ type cTag struct {
 	keys                 *cTag // only populated when using tag's 'keys' and 'endkeys' for map key validation
 	next                 *cTag
 	fn                   FuncCtx
+	fne                  FuncCtxError
 	typeof               tagType
 	hasTag               bool
 	hasAlias             bool
@@ -284,6 +285,7 @@ func (v *Validate) parseFieldTagsRecursive(tag string, fieldName string, alias s
 
 				if wrapper, ok := v.validations[current.tag]; ok {
 					current.fn = wrapper.fn
+					current.fne=wrapper.fne
 					current.runValidationWhenNil = wrapper.runValidatinOnNil
 				} else {
 					panic(strings.TrimSpace(fmt.Sprintf(undefinedValidation, current.tag, fieldName)))

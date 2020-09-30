@@ -177,7 +177,39 @@ func (v *validate) traverseField(ctx context.Context, parent reflect.Value, curr
 					v.cf = cf
 					v.ct = ct
 
-					if !ct.fn(ctx, v) {
+					var tmp error
+					if ct.fne!=nil{
+						tmp=ct.fne(ctx,v)
+					}
+					if tmp!=nil{
+						tmp=ct.fne(ctx,v)
+
+						v.str1 = string(append(ns, cf.altName...))
+
+						if v.v.hasTagNameFunc {
+							v.str2 = string(append(structNs, cf.name...))
+						} else {
+							v.str2 = v.str1
+						}
+
+						v.errs = append(v.errs,
+							&fieldError{
+								v:              v.v,
+								tag:            ct.aliasTag,
+								actualTag:      ct.tag,
+								ns:             v.str1,
+								structNs:       v.str2,
+								fieldLen:       uint8(len(cf.altName)),
+								structfieldLen: uint8(len(cf.name)),
+								value:          current.Interface(),
+								param:          ct.param,
+								kind:           kind,
+								typ:            typ,
+								customError: tmp,
+							},
+						)
+						return
+					}else if ct.fn!=nil&&!ct.fn(ctx, v) {
 						v.str1 = string(append(ns, cf.altName...))
 
 						if v.v.hasTagNameFunc {
@@ -442,7 +474,39 @@ OUTER:
 			v.cf = cf
 			v.ct = ct
 
-			if !ct.fn(ctx, v) {
+			var tmp error
+			if ct.fne!=nil{
+				tmp=ct.fne(ctx,v)
+			}
+			if tmp!=nil{
+				tmp:=ct.fne(ctx,v)
+				v.str1 = string(append(ns, cf.altName...))
+
+				if v.v.hasTagNameFunc {
+					v.str2 = string(append(structNs, cf.name...))
+				} else {
+					v.str2 = v.str1
+				}
+
+				v.errs = append(v.errs,
+					&fieldError{
+						v:              v.v,
+						tag:            ct.aliasTag,
+						actualTag:      ct.tag,
+						ns:             v.str1,
+						structNs:       v.str2,
+						fieldLen:       uint8(len(cf.altName)),
+						structfieldLen: uint8(len(cf.name)),
+						value:          current.Interface(),
+						param:          ct.param,
+						kind:           kind,
+						typ:            typ,
+						customError: tmp,
+					},
+				)
+
+				return
+			}else if ct.fn!=nil&&!ct.fn(ctx, v) {
 
 				v.str1 = string(append(ns, cf.altName...))
 

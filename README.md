@@ -8,6 +8,11 @@ Package validator
 [![GoDoc](https://godoc.org/github.com/go-playground/validator?status.svg)](https://pkg.go.dev/github.com/go-playground/validator/v10)
 ![License](https://img.shields.io/dub/l/vibe-d.svg)
 
+
+### This is my own version. The difference from the original version is that the validation function we can register supports directly returning error ###
+issue: https://github.com/go-playground/validator/issues/669
+
+
 Package validator implements value validations for structs and individual fields based on tags.
 
 It has the following **unique** features:

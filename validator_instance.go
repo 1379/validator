@@ -65,6 +65,7 @@ type TagNameFunc func(field reflect.StructField) string
 
 type internalValidationFuncWrapper struct {
 	fn                FuncCtx
+	fne               FuncCtxError
 	runValidatinOnNil bool
 }
 
@@ -161,6 +162,30 @@ func (v *Validate) RegisterTagNameFunc(fn TagNameFunc) {
 // - this method is not thread-safe it is intended that these all be registered prior to any validation
 func (v *Validate) RegisterValidation(tag string, fn Func, callValidationEvenIfNull ...bool) error {
 	return v.RegisterValidationCtx(tag, wrapFunc(fn), callValidationEvenIfNull...)
+}
+
+func (v *Validate) RegisterValidationWithError(tag string, fn FuncError, callValidationEvenIfNull ...bool) error {
+	var nilCheckable bool
+	if len(callValidationEvenIfNull) > 0 {
+		nilCheckable = callValidationEvenIfNull[0]
+	}
+	if len(tag) == 0 {
+		return errors.New("Function Key cannot be empty")
+	}
+
+	if fn == nil {
+		return errors.New("Function cannot be empty")
+	}
+
+	_, ok := restrictedTags[tag]
+	if ok || strings.ContainsAny(tag, restrictedTagChars) {
+		panic(fmt.Sprintf(restrictedTagErr, tag))
+	}
+	wrapFun := func(ctx context.Context, fl FieldLevel) error {
+		return fn(fl)
+	}
+	v.validations[tag] = internalValidationFuncWrapper{fne: wrapFun, runValidatinOnNil: nilCheckable}
+	return nil
 }
 
 // RegisterValidationCtx does the same as RegisterValidation on accepts a FuncCtx validation
